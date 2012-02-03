@@ -1,0 +1,12 @@
+= Sungani JS Libraries
+Sungani is a web api and toolset for saving mobile and web games. It handles the server, you can concentrate on the game itself.
+These are the libraries that handle savegames for javascript web games.
+
+== Requires
+1. jquery
+
+== Notes
+Comes with a small eventing library called MicroEvent. This is included for convenience: http://notes.jetienne.com/2011/03/22/microeventjs.html
+
+== License
+The library is licensed under the MIT license. 
