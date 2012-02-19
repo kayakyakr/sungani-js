@@ -11,9 +11,9 @@ Object.defineProperties(match.prototype, {
   load: {
     value: function(id){
       var opts = {
-        type: 'GET',
+        method: 'GET',
         url: Sungani.url + '/matches/' + id,
-        dataType: 'json',
+        scope: this,
         success: function(data, status, xhr){
           if(data.updated_at && data.updated_at === this.updated_at){
             // nothing changed
@@ -21,15 +21,15 @@ Object.defineProperties(match.prototype, {
           }
           Object.apply(this, data);
           this.trigger('load');
-        }.bind(this)
+        }
       };
       
       if(this.updated_at){
-        opts['data'] = opts['data'] || {};
-        opts['data']['updated_at'] = this.updated_at;
+        opts['params'] = opts['params'] || {};
+        opts['params']['updated_at'] = this.updated_at;
       }
       
-      $.ajax(opts);
+      Sungani.ajax(opts);
     },
     enumerable: false,
     writeable: false,
@@ -45,37 +45,37 @@ Object.defineProperties(match.prototype, {
   },
   save: {
     value: function(){
-      $.ajax({
-        type: 'PUT',
+      Sungani.ajax({
+        method: 'PUT',
         url: Sungani.url + '/matches/' + this.id,
-        dataType: 'json',
-        data: {
+        scope: this,
+        params: {
           match: JSON.stringify(this)
         },
         success: function(data, status, xhr){
           Object.apply(this, data);
           this.trigger('save');
           this.trigger('load');
-        }.bind(this)
+        }
       });
     },
     writeable: false,
     configurable: false
   },
   create: {
-    value: function(game_id, users){
-      $.ajax({
-        type: 'POST',
+    value: function(users){
+      Sungani.ajax({
+        method: 'POST',
         url: Sungani.url + '/matches',
-        dataType: 'json',
-        data: {
-          game_id: game_id,
+        params: {
+          game_id: Sungani.Game.id,
           users: users
         },
+        scope: this,
         success: function(data, status, xhr){
           Object.apply(this, data);
           this.trigger('create');
-        }.bind(this)
+        }
       });
     },
     writeable: false,
