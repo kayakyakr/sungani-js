@@ -9,7 +9,7 @@
     Sungani;
   }
   catch(e){
-    Sungani = {url: 'sungani.heroku.com'};
+    Sungani = {url: 'http://www.sungani.com'};
   }
   
   Object.defineProperties(Sungani, {
