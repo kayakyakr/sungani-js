@@ -3,15 +3,60 @@
 
 
 
+
 (function(){
   try{
     Sungani;
   }
   catch(e){
-    Sungani = {};
+    Sungani = {url: 'http://www.sungani.com'};
   }
-})()
-;
+  
+  Object.defineProperties(Sungani, {
+    ajax: {
+      /**
+       * wrapper to do ajax requests. for now wrap jquery. later do it library-less
+       * @params opts     [Object]   Options for jquery request
+       * @opts   url      String     URL to send the request to
+       * @opts   method   [String]   Method to use to send the reqeust. Default: 'GET'
+       * @opts   scope    [Object]   The scope that the response will be called in
+       * @opts   success  [Function] Called on success
+       * @opts   failure  [Function] Called on failure
+       * @opts   callback [Function] Called on success or failure
+       * @opts   params   [Object]   The parameters for the ajax call
+       */
+      value: function(opts){
+        // build options hash        
+        var option_hash = {
+          url: opts['url'],
+          type: opts['method'] || 'GET',
+          dataType: 'json',
+          headers: {
+            'X-AUTH-TOKEN': Sungani.User.authentication_token || (localStorage && localStorage.getItem('sungani_authentication_token'))
+          }
+        };
+        
+        if(opts['scope']){
+          option_hash['context'] = opts['scope'];
+        }
+        if(opts['success']){
+          option_hash['success'] = opts['success'];
+        }
+        if(opts['failure']){
+          option_hash['failure'] = opts['failure'];
+        }
+        if(opts['callback']){
+          option_hash['complete'] = opts['callback'];
+        }
+        if(opts['params']){
+          option_hash['data'] = opts['params'];
+        }
+        
+        $.ajax(option_hash);
+      }
+    }
+  });
+})();
 /**
  * MicroEvent - to make any js object an event emitter (server or browser)
  * 
@@ -75,55 +120,48 @@
   	module.exports	= MicroEvent
   }
 })();
+Object.apply = function(obj, cfg){
+  for(var i in cfg){
+    obj[i] = cfg[i];
+  }
+}
+
+Object.applyIf = function(obj, cfg){
+  for(var i in cfg){
+    if(obj[i] === undefined){
+      obj[i] = cfg[i];
+    }
+  }
+}
+
+Array.prototype.shuffle = function() {
+    var tmp, current, top = this.length;
+
+    if(top) while(--top) {
+        current = Math.floor(Math.random() * (top + 1));
+        tmp = this[current];
+        this[current] = this[top];
+        this[top] = tmp;
+    }
+
+    return this;
+}
+;
 
 (function(){
 var game = function(config){}
 
+MicroEvent.mixin(game);
+
 Object.defineProperties(game.prototype, {
-  load_matches: {
-    value: function(cb){
-      $.ajax({
-        method: 'GET',
-        url: '/matches',
-        dataType: 'json',
-        success: function(data, status, xhr){
-          this.matches = data;
-          cb();
-        }.bind(this)
-      });
-    },
-    writeable: false,
-    configurable: false
-  },
-  matches: {
-    value: [],
-    enumerable: true
-  },
   load: {
-    value: function(id, cb){
-      $.ajax({
+    value: function(){
+      Sungani.ajax({
         method: 'GET',
-        url: '/games/' + id,
-        dataType: 'json',
+        url: Sungani.url + '/games/' + Sungani.Game.id,
         success: function(data, status, xhr){
           Object.apply(this, data);
-          if(cb){
-            cb();
-          }
-        }.bind(this)
-      });
-    },
-    writeable: false,
-    configurable: false
-  },
-  list: {
-    value: function(cb){
-      $.ajax({
-        method: 'GET',
-        url: '/games',
-        dataType: 'json',
-        success: function(data, status, xhr){
-          cb(data);
+          this.trigger('load')
         }.bind(this)
       });
     },
@@ -147,9 +185,9 @@ Object.defineProperties(match.prototype, {
   load: {
     value: function(id){
       var opts = {
-        type: 'GET',
-        url: '/matches/' + id,
-        dataType: 'json',
+        method: 'GET',
+        url: Sungani.url + '/matches/' + id,
+        scope: this,
         success: function(data, status, xhr){
           if(data.updated_at && data.updated_at === this.updated_at){
             // nothing changed
@@ -157,15 +195,15 @@ Object.defineProperties(match.prototype, {
           }
           Object.apply(this, data);
           this.trigger('load');
-        }.bind(this)
+        }
       };
       
-      if(this.updated_at){
-        opts['data'] = opts['data'] || {};
-        opts['data']['updated_at'] = this.updated_at;
+      if(id === this.id && this.updated_at){
+        opts['params'] = opts['params'] || {};
+        opts['params']['updated_at'] = this.updated_at;
       }
       
-      $.ajax(opts);
+      Sungani.ajax(opts);
     },
     enumerable: false,
     writeable: false,
@@ -181,37 +219,37 @@ Object.defineProperties(match.prototype, {
   },
   save: {
     value: function(){
-      $.ajax({
-        type: 'PUT',
-        url: '/matches/' + this.id,
-        dataType: 'json',
-        data: {
+      Sungani.ajax({
+        method: 'PUT',
+        url: Sungani.url + '/matches/' + this.id,
+        scope: this,
+        params: {
           match: JSON.stringify(this)
         },
         success: function(data, status, xhr){
           Object.apply(this, data);
           this.trigger('save');
           this.trigger('load');
-        }.bind(this)
+        }
       });
     },
     writeable: false,
     configurable: false
   },
   create: {
-    value: function(game_id, users){
-      $.ajax({
-        type: 'POST',
-        url: '/matches',
-        dataType: 'json',
-        data: {
-          game_id: game_id,
+    value: function(users){
+      Sungani.ajax({
+        method: 'POST',
+        url: Sungani.url + '/matches',
+        params: {
+          game_id: Sungani.Game.id,
           users: users
         },
+        scope: this,
         success: function(data, status, xhr){
           Object.apply(this, data);
           this.trigger('create');
-        }.bind(this)
+        }
       });
     },
     writeable: false,
@@ -241,4 +279,128 @@ Object.defineProperties(match.prototype, {
 });
 
 Sungani.Match = new match();
+})();
+
+
+(function(){
+var user = function(config){}
+
+MicroEvent.mixin(user);
+
+Object.defineProperties(user.prototype, {
+  signIn: {
+    value: function(user, pass){
+      Sungani.ajax({
+        method: 'POST',
+        url: Sungani.url + '/users/sign_in.json',
+        params: {
+          'user[email]': user,
+          'user[password]': pass
+        },
+        scope: this,
+        success: function(data, status, xhr){
+          this.id = data.id;
+          this.name = data.name;
+          this.authentication_token = data.authentication_token;
+          
+          if(localStorage){
+            localStorage.setItem('sungani_authentication_token', data.authentication_token)
+          }
+          
+          this.trigger('signedin');
+        },
+        failure: function(){
+          this.id = null;
+        }
+      });
+    }
+  },
+  
+  signOut: {
+    value: function(){
+      Sungani.ajax({
+        method: 'GET',
+        url: Sungani.url + '/users/sign_out.json',
+        scope: this,
+        success: function(data, status, xhr){
+          this.id = null;
+          this.name = null;
+          this.authentication_token = null;
+          
+          if(localStorage){
+            localStorage.setItem('sungani_authentication_token', null)
+          }
+          
+          this.trigger('signedout');
+        }
+      });
+    }
+  },
+  
+  checkSignedIn: {
+    value: function(){
+      Sungani.ajax({
+        method: 'GET',
+        url: Sungani.url + '/users/signed_in.json',
+        scope: this,
+        success: function(data, status, xhr){
+          if(data.signed_in){
+            this.id = data.id;
+            this.name = data.name;
+            this.authentication_token = data.authentication_token;
+            
+            if(localStorage){
+              localStorage.setItem('sungani_authentication_token', data.authentication_token);
+            }
+            
+            this.trigger('signedin');
+          }
+          else{
+            this.id = null;
+            this.name = null;
+            this.authentication_token = null;
+            if(localStorage){
+              localStorage.setItem('sungani_authentication_token', null)
+            }
+            this.trigger('signedout');
+          }
+        }
+      });
+    }
+  },
+  
+  isSignedIn: {
+    value: function(){
+      if(this.id !== undefined && this.id !== null){
+        return true;
+      }
+      else{
+        if(localStorage){
+          var auth_token;
+          if(auth_token = localStorage.getItem('sungani_authentication_token')){
+            Sungani.User.authentication_token = auth_token;
+            this.checkSignedIn();
+            return true;
+          }
+        }
+        return false;
+      }
+    }
+  },
+  
+  index: {
+    value: function(){
+      Sungani.ajax({
+        method: 'GET',
+        url: Sungani.url + '/users.json',
+        scope: this,
+        success: function(data, status, xhr){
+          this.trigger('index', data);
+        }
+      })
+    }
+  }
+});
+
+Sungani.User = new user();
 })();
