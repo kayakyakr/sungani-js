@@ -24,7 +24,7 @@ Object.defineProperties(match.prototype, {
         }
       };
       
-      if(this.updated_at){
+      if(id === this.id && this.updated_at){
         opts['params'] = opts['params'] || {};
         opts['params']['updated_at'] = this.updated_at;
       }
