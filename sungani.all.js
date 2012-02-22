@@ -202,6 +202,7 @@ Object.defineProperties(match.prototype, {
         opts['params'] = opts['params'] || {};
         opts['params']['updated_at'] = this.updated_at;
       }
+      this.updated_at = null;
       
       Sungani.ajax(opts);
     },
