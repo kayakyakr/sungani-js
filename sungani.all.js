@@ -43,7 +43,7 @@
           option_hash['success'] = opts['success'];
         }
         if(opts['failure']){
-          option_hash['failure'] = opts['failure'];
+          option_hash['error'] = opts['failure'];
         }
         if(opts['callback']){
           option_hash['complete'] = opts['callback'];
@@ -250,6 +250,14 @@ Object.defineProperties(match.prototype, {
         success: function(data, status, xhr){
           Object.apply(this, data);
           this.trigger('create');
+        },
+        failure: function(xhr, status, error){
+          try{
+            var resp = JSON.parse(xhr.responseText);
+            this.trigger('create_error', resp);
+          }
+          catch(e){
+          }
         }
       });
     },

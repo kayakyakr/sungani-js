@@ -43,7 +43,7 @@
           option_hash['success'] = opts['success'];
         }
         if(opts['failure']){
-          option_hash['failure'] = opts['failure'];
+          option_hash['error'] = opts['failure'];
         }
         if(opts['callback']){
           option_hash['complete'] = opts['callback'];
