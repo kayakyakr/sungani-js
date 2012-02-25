@@ -264,6 +264,17 @@ Object.defineProperties(match.prototype, {
     writeable: false,
     configurable: false
   },
+  destroy: {
+    value: function(id){
+      if(!id){
+        id = this.id;
+      }
+      Sungani.ajax({
+        method: 'DELETE',
+        url: Sungani.url + '/matches/' + id
+      });
+    }
+  },
   start_polling: {
     value: function(){
       if(timer_id){
