@@ -2,6 +2,8 @@
 Sungani is a web api and toolset for saving mobile and web games. It handles the server, you can concentrate on the game itself.
 These are the libraries that handle savegames for javascript web games.
 
+For API documentation visit: http://www.sungani.com/developers/api/Home
+
 == Requires
 1. jquery
 
