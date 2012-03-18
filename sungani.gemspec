@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = %q{sungani-js}
-  s.version = "0.0.2"
+  s.version = "0.1.0"
   s.date = %q{2011-02-12}
   s.authors = ["Charles DuBose"]
   s.email = %q{charles@dubo.se}
