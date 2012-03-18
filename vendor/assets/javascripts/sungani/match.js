@@ -19,7 +19,7 @@ Object.defineProperties(match.prototype, {
             // nothing changed
             return;
           }
-          Object.apply(this, data);
+          Object.applyValues(this, data);
           this.trigger('load');
         }
       };
@@ -36,14 +36,6 @@ Object.defineProperties(match.prototype, {
     writeable: false,
     configurable: false
   },
-  refresh: {
-    value: function(){
-      this.load(this.id);
-    },
-    enumerable: false,
-    writaeable: false,
-    configurable: false
-  },
   save: {
     value: function(){
       Sungani.ajax({
@@ -54,7 +46,7 @@ Object.defineProperties(match.prototype, {
           match: JSON.stringify(this)
         },
         success: function(data, status, xhr){
-          Object.apply(this, data);
+          Object.applyValues(this, data);
           this.trigger('save');
           this.trigger('load');
         }
@@ -74,7 +66,7 @@ Object.defineProperties(match.prototype, {
         },
         scope: this,
         success: function(data, status, xhr){
-          Object.apply(this, data);
+          Object.applyValues(this, data);
           this.trigger('create');
         },
         failure: function(xhr, status, error){
@@ -99,25 +91,24 @@ Object.defineProperties(match.prototype, {
         method: 'DELETE',
         url: Sungani.url + '/matches/' + id
       });
-    }
-  },
-  start_polling: {
-    value: function(){
-      if(timer_id){
-        // it's already running, don't need to do anything
-        return;
-      }
-      timer_id = setInterval(function(){
-        this.refresh();
-      }.bind(this), 15000);
     },
     writeable: false,
     configurable: false
   },
-  stop_polling: {
+  unload: {
     value: function(){
-      clearInterval(timer_id);
-      timer_id = null
+      this.id = null;
+    }
+  },
+  update: {
+    value: function(json){
+      if(json.id == this.id){
+        Object.applyValues(this, json);
+        this.trigger('update', json);
+      }
+      else{
+        this.trigger('other_update', json);
+      }
     },
     writeable: false,
     configurable: false

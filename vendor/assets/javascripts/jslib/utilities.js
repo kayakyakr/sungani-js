@@ -1,15 +1,15 @@
 
 (function(){
-  if(!Object.apply){
-    Object.apply = function(obj, cfg){
+  if(!Object.applyValues){
+    Object.applyValues = function(obj, cfg){
       for(var i in cfg){
         obj[i] = cfg[i];
       }
     }
   }
   
-  if(!Object.applyIf){
-    Object.applyIf = function(obj, cfg){
+  if(!Object.applyValuesIf){
+    Object.applyValuesIf = function(obj, cfg){
       for(var i in cfg){
         if(obj[i] === undefined){
           obj[i] = cfg[i];

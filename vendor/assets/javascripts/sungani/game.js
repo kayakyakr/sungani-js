@@ -11,7 +11,7 @@ Object.defineProperties(game.prototype, {
         method: 'GET',
         url: Sungani.url + '/games/' + Sungani.Game.id,
         success: function(data, status, xhr){
-          Object.apply(this, data);
+          Object.applyValues(this, data);
           this.trigger('load')
         }.bind(this)
       });

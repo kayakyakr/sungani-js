@@ -1,16 +1,39 @@
 // MIT License, see https://github.com/kayakyakr/sungani-js
-//= require_self
-//= require ../jslib/microevent
-//= require ../jslib/utilities
+//= require_directory ../jslib
+//= require ./ns
 //= require_directory .
+//= require_self
 
 (function(){
   try{
     Sungani;
   }
   catch(e){
-    Sungani = {url: 'http://www.sungani.com'};
+    Sungani = {
+      url: 'http://www.sungani.com',
+      socket_url: 'http://socket.sungani.com'
+    };
   }
+  
+  var socket = null;
+  
+  Sungani.User.bind('signedin', function(){
+    socket = io.connect(Sungani.socket_url);
+    
+    socket.on('connect', function(){
+      socket.emit('user_id', Sungani.User.id);
+    });
+    
+    socket.on('update', function(json){
+      Sungani.Match.update(json);
+    });
+  });
+  
+  Sungani.User.bind('signedout', function(){
+    if(socket){
+      socket.disconnect();
+    }
+  });
   
   Object.defineProperties(Sungani, {
     ajax: {
@@ -53,6 +76,11 @@
         }
         
         $.ajax(option_hash);
+      }
+    },
+    socket: {
+      get: function(){
+        return socket;
       }
     }
   });
