@@ -2818,7 +2818,7 @@ Sungani.User = new user();
   catch(e){
     Sungani = {
       url: 'http://www.sungani.com',
-      socket_url: 'http://socket.sungani.com'
+      socket_url: 'http://sockets.sungani.com'
     };
   }
   
